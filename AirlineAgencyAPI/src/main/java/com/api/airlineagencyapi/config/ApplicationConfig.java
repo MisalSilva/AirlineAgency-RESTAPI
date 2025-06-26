@@ -24,7 +24,7 @@ public class ApplicationConfig extends Application {
     public Set<Class<?>> getClasses() {
         Set<Class<?>> resources = new HashSet<>();
         
-        // Register your resource classes
+        // Register resource classes
         resources.add(FlightResource.class);
         resources.add(PassengerResource.class);
         resources.add(BookingResource.class);
