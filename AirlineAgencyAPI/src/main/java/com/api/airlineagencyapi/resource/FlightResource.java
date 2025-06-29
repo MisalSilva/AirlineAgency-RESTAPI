@@ -3,11 +3,11 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
 package com.api.airlineagencyapi.resource;
-/**
- *
- * @author misal
- */
+
+import com.api.airlineagencyapi.exception.*;
 import com.api.airlineagencyapi.model.Flight;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.MediaType;
@@ -19,44 +19,53 @@ import java.util.*;
 @Consumes(MediaType.APPLICATION_JSON)
 public class FlightResource {
 
+    private static final Logger logger = LoggerFactory.getLogger(FlightResource.class);
     private static final Map<String, Flight> flightMap = new HashMap<>();
 
     // POST /flights
     @POST
     public Response createFlight(Flight flight) {
+        logger.info("Creating flight: {}", flight.getFlightNumber());
+
         if (flightMap.containsKey(flight.getFlightNumber())) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "Flight already exists"))
-                    .build();
+            logger.warn("Flight {} already exists", flight.getFlightNumber());
+            throw new FlightAlreadyExistsException(flight.getFlightNumber());
         }
 
         if (flight.getCapacity() <= 0) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(Map.of("error", "Flight capacity must be greater than 0"))
-                    .build();
+            logger.warn("Invalid capacity for flight {}: {}", flight.getFlightNumber(), flight.getCapacity());
+            throw new InvalidFlightCapacityException(flight.getCapacity());
         }
 
         flight.setAvailableSeats(flight.getCapacity());
         flightMap.put(flight.getFlightNumber(), flight);
+
+        logger.info("Flight {} created successfully", flight.getFlightNumber());
         return Response.status(Response.Status.CREATED).entity(flight).build();
     }
 
     // GET /flights
     @GET
     public Response getAllFlights() {
-        return Response.ok(new ArrayList<>(flightMap.values())).build();
+        logger.debug("Retrieving all flights");
+        List<Flight> flights = new ArrayList<>(flightMap.values());
+        logger.info("Retrieved {} flights", flights.size());
+        return Response.ok(flights).build();
     }
 
     // GET /flights/{flightNumber}
     @GET
     @Path("/{flightNumber}")
     public Response getFlight(@PathParam("flightNumber") String flightNumber) {
+        logger.debug("Fetching flight: {}", flightNumber);
+
         Flight flight = flightMap.get(flightNumber);
         if (flight == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("error", "Flight not found"))
-                    .build();
+            logger.warn("Flight {} not found", flightNumber);
+            throw new FlightNotFoundException(flightNumber);
         }
+
+        logger.info("Flight {} retrieved successfully", flightNumber);
         return Response.ok(flight).build();
     }
 
@@ -64,11 +73,12 @@ public class FlightResource {
     @PUT
     @Path("/{flightNumber}")
     public Response updateFlight(@PathParam("flightNumber") String flightNumber, Flight updated) {
+        logger.info("Updating flight: {}", flightNumber);
+
         Flight existing = flightMap.get(flightNumber);
         if (existing == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("error", "Flight not found"))
-                    .build();
+            logger.warn("Flight {} not found for update", flightNumber);
+            throw new FlightNotFoundException(flightNumber);
         }
 
         existing.setOrigin(updated.getOrigin());
@@ -77,6 +87,8 @@ public class FlightResource {
         existing.setArrivalTime(updated.getArrivalTime());
         existing.setCapacity(updated.getCapacity());
         existing.setAvailableSeats(updated.getAvailableSeats());
+
+        logger.info("Flight {} updated successfully", flightNumber);
         return Response.ok(existing).build();
     }
 
@@ -84,12 +96,15 @@ public class FlightResource {
     @DELETE
     @Path("/{flightNumber}")
     public Response deleteFlight(@PathParam("flightNumber") String flightNumber) {
+        logger.info("Deleting flight: {}", flightNumber);
+
         Flight removed = flightMap.remove(flightNumber);
         if (removed == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(Map.of("error", "Flight not found"))
-                    .build();
+            logger.warn("Flight {} not found for deletion", flightNumber);
+            throw new FlightNotFoundException(flightNumber);
         }
+
+        logger.info("Flight {} deleted successfully", flightNumber);
         return Response.ok(Map.of("message", "Flight deleted")).build();
     }
 }
