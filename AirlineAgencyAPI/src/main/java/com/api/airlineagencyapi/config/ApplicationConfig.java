@@ -11,6 +11,10 @@ package com.api.airlineagencyapi.config;
 import com.api.airlineagencyapi.resource.BookingResource;
 import com.api.airlineagencyapi.resource.FlightResource;
 import com.api.airlineagencyapi.resource.PassengerResource;
+import com.api.airlineagencyapi.exception.mapper.BadRequestExceptionMapper;
+import com.api.airlineagencyapi.exception.mapper.ResourceNotFoundExceptionMapper;
+import com.api.airlineagencyapi.exception.mapper.GenericExceptionMapper;
+
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
@@ -28,6 +32,9 @@ public class ApplicationConfig extends Application {
         resources.add(FlightResource.class);
         resources.add(PassengerResource.class);
         resources.add(BookingResource.class);
+        resources.add(BadRequestExceptionMapper.class);
+        resources.add(ResourceNotFoundExceptionMapper.class);
+        resources.add(GenericExceptionMapper.class);
 
         return resources;
     }
