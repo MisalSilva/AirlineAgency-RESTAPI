@@ -24,7 +24,7 @@ import java.util.*;
 public class PassengerResource {
 
     private static final Logger logger = LoggerFactory.getLogger(PassengerResource.class);
-    private static final Map<String, Passenger> passengerMap = new HashMap<>();
+    public static final Map<String, Passenger> passengerMap = new HashMap<>();
     private static int passengerIdCounter = 1;
 
     // POST /passengers
