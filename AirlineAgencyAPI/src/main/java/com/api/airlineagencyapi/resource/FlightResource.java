@@ -20,7 +20,7 @@ import java.util.*;
 public class FlightResource {
 
     private static final Logger logger = LoggerFactory.getLogger(FlightResource.class);
-    private static final Map<String, Flight> flightMap = new HashMap<>();
+    public static final Map<String, Flight> flightMap = new HashMap<>();
 
     // POST /flights
     @POST
